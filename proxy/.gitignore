@@ -12,7 +12,7 @@ Thumbs.db
 
 # Build and Dependency Directories
 node_modules/
-dist/
+#dist/
 build/
 target/
 out/
