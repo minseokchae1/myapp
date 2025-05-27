@@ -1,15 +1,12 @@
-name: Deploy to EC2 on Push
-
+name: EC2 Docker Deploy
 on:
   push:
     branches: [ main ]
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
+      - name: Checkout workflow files
         uses: actions/checkout@v3
 
       - name: Deploy via SSH
@@ -20,8 +17,14 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd ~/myapp || git clone https://github.com/minseockchae1/myapp.git ~/myapp
-            cd ~/myapp
+            cd ~
+            # myapp 디렉터리가 없으면 HTTPS+토큰으로 클론
+            if [ ! -d "myapp" ]; then
+              git clone https://x-access-token:${GITHUB_TOKEN}@github.com/minseokchae1/myapp.git myapp
+            fi
+            cd myapp
             git pull origin main
-            docker-compose down
+
+            # Docker 컨테이너 재시작
+            docker-compose down || true
             docker-compose up -d --build
