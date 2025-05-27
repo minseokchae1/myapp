@@ -16,11 +16,15 @@ jobs:
       uses: appleboy/ssh-action@v1.0.0
       with:
         host: ${{ secrets.EC2_HOST }}
-        port: ${{ secrets.EC2_SSH_PORT }}
         username: ubuntu
+        port: ${{ secrets.EC2_SSH_PORT }}
         key: ${{ secrets.EC2_SSH_KEY }}
         script: |
-          cd ~/myapp
+          cd ~
+          if [ ! -d "myapp/.git" ]; then
+            git clone https://github.com/minseokchae1/myapp.git
+          fi
+          cd myapp
           git pull origin main
-          docker-compose down
+          docker-compose down || true
           docker-compose up -d --build
