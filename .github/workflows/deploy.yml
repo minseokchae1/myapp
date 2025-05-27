@@ -19,7 +19,6 @@ jobs:
         port: ${{ secrets.EC2_SSH_PORT }}
         username: ubuntu
         key: ${{ secrets.EC2_SSH_KEY }}
-        key_encoding: base64
         script: |
           cd ~/myapp
           git pull origin main
