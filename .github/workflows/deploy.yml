@@ -1,4 +1,4 @@
-name: EC2 Docker Deploy
+name: Deploy to EC2 on Push
 
 on:
   push:
@@ -9,39 +9,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Deploy to EC2
-      uses: appleboy/ssh-action@v1.0.0
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        port: ${{ secrets.EC2_SSH_PORT }}
-        username: ubuntu
-        key: ${{ secrets.EC2_SSH_KEY }}
-        key_encoding: base64
-        script: |
-          cd ~
-          if [ ! -d "myapp/.git" ]; then
-            git clone https://github.com/minseokchae1/myapp.git
-          fi
-          cd myapp
-          git pull origin main
-
-          # Node.js 설치
-          curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-          sudo apt-get install -y nodejs
-
-          # 프론트엔드 빌드
-          cd frontend
-          npm install
-          npm run build
-          cd ..
-
-          # 빌드 결과 복사
-          rm -rf proxy/static/dist
-          cp -r frontend/dist proxy/static/
-
-          # Docker 재시작
-          docker-compose down || true
-          docker-compose up -d --build
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          port: ${{ secrets.EC2_SSH_PORT }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd ~/myapp || git clone https://github.com/minseockchae1/myapp.git ~/myapp
+            cd ~/myapp
+            git pull origin main
+            docker-compose down
+            docker-compose up -d --build
