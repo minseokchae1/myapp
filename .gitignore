@@ -1,0 +1,17 @@
+# node_modules
+node_modules/
+
+# .env 파일
+.env
+
+# 인증 키
+*.pem
+
+# 로그
+*.log
+
+# Vite build output
+dist/
+
+# VSCode settings
+.vscode/
