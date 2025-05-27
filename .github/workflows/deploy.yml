@@ -16,10 +16,9 @@ jobs:
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.EC2_HOST }}
-          port: ${{ secrets.EC2_SSH_PORT }}
           username: ubuntu
+          port: ${{ secrets.EC2_SSH_PORT }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          key_encoding: base64
           script: |
             cd ~
             if [ ! -d "myapp/.git" ]; then
@@ -28,11 +27,19 @@ jobs:
             cd myapp
             git pull origin main
 
+            # Node.js 설치
+            curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+            sudo apt-get install -y nodejs
+
             # 프론트엔드 빌드
             cd frontend
             npm install
             npm run build
             cd ..
+
+            # 빌드용 폴더 복사
+            rm -rf proxy/dist
+            cp -r frontend/dist proxy/dist
 
             docker-compose down || true
             docker-compose up -d --build
