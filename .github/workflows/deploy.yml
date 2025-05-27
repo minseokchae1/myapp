@@ -9,22 +9,30 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Deploy to EC2
-      uses: appleboy/ssh-action@v1.0.0
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ubuntu
-        port: ${{ secrets.EC2_SSH_PORT }}
-        key: ${{ secrets.EC2_SSH_KEY }}
-        script: |
-          cd ~
-          if [ ! -d "myapp/.git" ]; then
-            git clone https://github.com/minseokchae1/myapp.git
-          fi
-          cd myapp
-          git pull origin main
-          docker-compose down || true
-          docker-compose up -d --build
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          port: ${{ secrets.EC2_SSH_PORT }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          key_encoding: base64
+          script: |
+            cd ~
+            if [ ! -d "myapp/.git" ]; then
+              git clone https://github.com/minseokchae1/myapp.git
+            fi
+            cd myapp
+            git pull origin main
+
+            # 프론트엔드 빌드
+            cd frontend
+            npm install
+            npm run build
+            cd ..
+
+            docker-compose down || true
+            docker-compose up -d --build
