@@ -11,7 +11,7 @@ node_modules/
 *.log
 
 # Vite build output
-dist/
+#dist/
 
 # VSCode settings
 .vscode/
